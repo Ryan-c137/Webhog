@@ -1,0 +1,68 @@
+/* The main horizontal container */
+SystemInfoDisplay {
+    width: 100%;
+    height: 100%;
+    layout: horizontal;
+    background: $surface;
+    /* Allow scrolling so info is never truly 'lost' when narrow */
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+/* Base style for all blocks - No margins or padding for the 'tight' look */
+.block, .cpu {
+    width: 1fr;
+    min-width: 24; 
+    height: auto;
+    border: round $primary;
+    border-title-align: center;
+    border-title-style: bold;
+    /* Remove margins and padding to make it touch the edges */
+    margin: 0;
+    padding: 0;
+    background: $surface;
+}
+
+/* Accent borders for distinct sections */
+.cpu { border: round $accent; }
+.disk_memory { border: round $secondary; }
+.network { border: round $warning; }
+
+/* Each core row: Forced to 1-character height */
+.bar{
+    height: 1;
+    margin: 0;
+    padding: 0;
+    layout: horizontal;
+}
+
+/* The Progress Bar: Set a min-width to ensure it stays on screen */
+.cores ProgressBar {
+    width: 1fr;
+    min-width: 12; /* This ensures the bar is always visible when narrow */
+    height: 1;
+    margin: 0;
+}
+
+/* Hide the internal percentage text to keep the bar solid and tight */
+ProgressBar > .progress-bar--label {
+    display: none; 
+}
+
+/* The labels: Narrowed down to give more room to the bar */
+.cores Static {
+    width: 5;
+    text-style: bold;
+    color: $text-muted;
+    content-align: center middle;
+}
+
+/* Tightening the Bar color and track */
+ProgressBar > .progress-bar--bar {
+    color: $accent;
+    background: $accent 15%;
+}
+
+ProgressBar > .progress-bar--complete {
+    color: $success;
+}
