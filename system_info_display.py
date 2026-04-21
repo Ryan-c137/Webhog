@@ -1,9 +1,8 @@
 from textual.app import App, ComposeResult
 from textual.widgets import ProgressBar, Static
 from textual.containers import Horizontal, Vertical
-import psutil
+from grabber import sys_info_grabber
 import asyncio
-import yaml
 
 
 # The display of all the system information
@@ -42,7 +41,7 @@ class SystemInfoDisplay(Horizontal):
 
         # Disk and Memory infomation part
         with Vertical(classes='block disk_memory') as v3:
-            v3.border_title = 'Disk and Memory Information'
+            v3.border_title = 'Disk and Memory'
             yield Static('Memory Usage: ')
             yield ProgressBar(total=100, id='memory_percentage', show_eta=False)
             yield Static('Total Memory Space: ' + str(info['memory_total']) + '  GB', classes='status')
@@ -52,9 +51,10 @@ class SystemInfoDisplay(Horizontal):
             yield ProgressBar(total=100, id='disk', show_eta=False)
 
         # network hardware information
-        yield Vertical(
-                  classes = 'block network'
-                  )
+        with Vertical(classes='block network') as v4:
+            v4.border_title = 'Network IO'
+
+
 
     async def on_mount(self):
         self.set_interval(0.3, self.update_info)
@@ -79,32 +79,32 @@ class SystemInfoDisplay(Horizontal):
         memory_free = self.query_one('#memory_free')
         memory_free.update('Free Memory Space: ' + str(info['memory_free']) + '  GB')
         disk = self.query_one('#disk')
-        disk.progess = info['disk_usage_percentage']
+        disk.progress = info['disk_usage_percentage']
 
 
 
 
-
-# By using psutil, grab system data: CPU, memory, disk, and network
-def sys_info_grabber():
-
-    # Calculate the real memory usage
-    memory = psutil.virtual_memory()
-    total = memory.total / (1024**3)
-    free = memory.available / (1024**3)
-    used = total - free
-    percentage = used / total * 100
-
-    info = {
-        'cpu_percent': psutil.cpu_percent(interval=1, percpu=True),
-        'cpu_core_numbers': psutil.cpu_count(),
-        'cpu_frequency': psutil.cpu_freq()._asdict(),
-        'memory_percentage': percentage,
-        'memory_total': total,
-        'memory_used': used,
-        'memory_free': free,
-        'disk_usage_percentage': psutil.disk_usage('/').percent,
-        'network_io': psutil.net_io_counters()._asdict()
-        }
-    print(yaml.dump(info))
-    return info
+#
+# # By using psutil, grab system data: CPU, memory, disk, and network
+# def sys_info_grabber():
+#
+#     # Calculate the real memory usage
+#     memory = psutil.virtual_memory()
+#     total = memory.total / (1024**3)
+#     free = memory.available / (1024**3)
+#     used = total - free
+#     percentage = used / total * 100
+#
+#     info = {
+#         'cpu_percent': psutil.cpu_percent(interval=1, percpu=True),
+#         'cpu_core_numbers': psutil.cpu_count(),
+#         'cpu_frequency': psutil.cpu_freq()._asdict(),
+#         'memory_percentage': percentage,
+#         'memory_total': total,
+#         'memory_used': used,
+#         'memory_free': free,
+#         'disk_usage_percentage': psutil.disk_usage('/').percent,
+#         'network_io': psutil.net_io_counters()._asdict()
+#         }
+#     print(yaml.dump(info))
+#     return info

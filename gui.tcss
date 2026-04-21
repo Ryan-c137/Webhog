@@ -44,25 +44,10 @@ SystemInfoDisplay {
     margin: 0;
 }
 
-/* Hide the internal percentage text to keep the bar solid and tight */
-ProgressBar > .progress-bar--label {
-    display: none; 
-}
-
 /* The labels: Narrowed down to give more room to the bar */
 .cores Static {
     width: 5;
     text-style: bold;
     color: $text-muted;
     content-align: center middle;
-}
-
-/* Tightening the Bar color and track */
-ProgressBar > .progress-bar--bar {
-    color: $accent;
-    background: $accent 15%;
-}
-
-ProgressBar > .progress-bar--complete {
-    color: $success;
 }
