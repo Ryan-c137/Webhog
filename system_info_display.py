@@ -1,7 +1,7 @@
 from textual.app import App, ComposeResult
 from textual.widgets import ProgressBar, Static
 from textual.containers import Horizontal, Vertical
-from grabber import sys_info_grabber
+from grabber import sys_info_grabber, network_info_grabber
 import asyncio
 
 
@@ -50,9 +50,17 @@ class SystemInfoDisplay(Horizontal):
             yield Static('Disk Usage Percentage:')
             yield ProgressBar(total=100, id='disk', show_eta=False)
 
+        # Get network information here
+        info = network_info_grabber()
         # network hardware information
         with Vertical(classes='block network') as v4:
             v4.border_title = 'Network IO'
+            yield Static('Activated Network Interface: ' + info['active'][0]['name'], id='name', classes='status')
+            yield Static('IPv4 address: ' + info['active'][0]['ipv4'], id='ipv4', classes='status')
+            yield Static('IPv6 address: ' + info['active'][0]['ipv6'], id='ipv6', classes='status')
+            yield Static('MAC address: ' + info['active'][0]['name'], id='mac', classes='status')
+            yield Static('Data Sending Speed: ' + str(info['sent']) + ' Mbps', id='sent', classes='status')
+            yield Static('Data Receiving Speed: ' + str(info['recv']) + ' Mbps', id='recv', classes='status')
 
 
 
@@ -61,6 +69,7 @@ class SystemInfoDisplay(Horizontal):
         await self.update_info()
 
     async def update_info(self):
+        # Update system informtaion
         info = sys_info_grabber()
         bar1 = self.query_one('#core_1_2')
         bar1.progress = info['cpu_percent'][0] + info['cpu_percent'][1]
@@ -81,30 +90,18 @@ class SystemInfoDisplay(Horizontal):
         disk = self.query_one('#disk')
         disk.progress = info['disk_usage_percentage']
 
+        # Update network information
+        info = network_info_grabber()
+        name = self.query_one('#name')
+        name.update('Activated Network Interface: ' + info['active'][0]['name'])
+        ipv4 = self.query_one('#ipv4')
+        ipv4.update('IPv4 address: ' + info['active'][0]['ipv4'])
+        ipv6 = self.query_one('#ipv6')
+        ipv6.update('IPv6 address: ' + info['active'][0]['ipv6'])
+        mac = self.query_one('#mac')
+        mac.update('MAC address: ' + info['active'][0]['mac'])
+        sent = self.query_one('#sent')
+        sent.update('Data Sending Speed: ' + str(info['sent']) + ' Mbps')
+        recv = self.query_one('#recv')
+        recv.update('Data Receiving Speed: ' + str(info['recv']) + ' Mbps')
 
-
-
-#
-# # By using psutil, grab system data: CPU, memory, disk, and network
-# def sys_info_grabber():
-#
-#     # Calculate the real memory usage
-#     memory = psutil.virtual_memory()
-#     total = memory.total / (1024**3)
-#     free = memory.available / (1024**3)
-#     used = total - free
-#     percentage = used / total * 100
-#
-#     info = {
-#         'cpu_percent': psutil.cpu_percent(interval=1, percpu=True),
-#         'cpu_core_numbers': psutil.cpu_count(),
-#         'cpu_frequency': psutil.cpu_freq()._asdict(),
-#         'memory_percentage': percentage,
-#         'memory_total': total,
-#         'memory_used': used,
-#         'memory_free': free,
-#         'disk_usage_percentage': psutil.disk_usage('/').percent,
-#         'network_io': psutil.net_io_counters()._asdict()
-#         }
-#     print(yaml.dump(info))
-#     return info
