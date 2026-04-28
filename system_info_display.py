@@ -2,7 +2,6 @@ from textual.app import App, ComposeResult
 from textual.widgets import ProgressBar, Static
 from textual.containers import Horizontal, Vertical
 from grabber import sys_info_grabber, network_info_grabber
-import asyncio
 
 
 # The display of all the system information
@@ -16,10 +15,9 @@ class SystemInfoDisplay(Horizontal):
         info = sys_info_grabber()
 
         # This is the block for CPU information
-        with Vertical(classes='block') as v1:
+        with Vertical(classes='panel cpu') as v1:
             v1.border_title = 'CPU Information'
-            with Vertical(classes='cpu') as v2:
-                v2.border_title = 'CPU Cores Usage Percentage'
+            with Vertical(classes='cores'):
                 with Horizontal(classes='bar'):
                     yield ProgressBar(total=100, id='core_1_2', show_eta=False)
                     yield Static('  1&2')
@@ -35,25 +33,26 @@ class SystemInfoDisplay(Horizontal):
                 with Horizontal(classes='bar'):
                     yield ProgressBar(total=100, id='core_7_8', show_eta=False)
                     yield Static('  7&8')
-            yield Static('Current CPU Frequency: ' + str(info['cpu_frequency']['current']), id='cpu_frequency', classes='status')
-            yield Static('Maximum CPU Frequency: ' + str(info['cpu_frequency']['max']), classes='status')
-            yield Static('Minimum CPU Frequency: ' + str(info['cpu_frequency']['min']), classes='status')
+
+                yield Static('Current CPU Frequency: ' + str(info['cpu_frequency']['current']), id='cpu_frequency', classes='status')
+                yield Static('Maximum CPU Frequency: ' + str(info['cpu_frequency']['max']), classes='status')
+                yield Static('Minimum CPU Frequency: ' + str(info['cpu_frequency']['min']), classes='status')
 
         # Disk and Memory infomation part
-        with Vertical(classes='block disk_memory') as v3:
-            v3.border_title = 'Disk and Memory'
+        with Vertical(classes='panel disk-memory') as v2:
+            v2.border_title = 'Disk & Memory'
             yield Static('Memory Usage: ')
             yield ProgressBar(total=100, id='memory_percentage', show_eta=False)
             yield Static('Total Memory Space: ' + str(info['memory_total']) + '  GB', classes='status')
             yield Static('Used Memory Space: ' + str(info['memory_used']) + '  GB', id='memory_used', classes='status')
             yield Static('Free Memory Space: ' + str(info['memory_free']) + '  GB', id='memory_free', classes='status')
-            yield Static('Disk Usage Percentage:')
+            yield Static('Disk Usage Percentage:', classes='status')
             yield ProgressBar(total=100, id='disk', show_eta=False)
 
         # Get network information here
         info = network_info_grabber()
         # network hardware information
-        with Vertical(classes='block network') as v4:
+        with Vertical(classes='panel network') as v4:
             v4.border_title = 'Network IO'
             yield Static('Activated Network Interface: ' + info['active'][0]['name'], id='name', classes='status')
             yield Static('IPv4 address: ' + info['active'][0]['ipv4'], id='ipv4', classes='status')

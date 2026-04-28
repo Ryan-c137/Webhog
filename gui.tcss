@@ -1,53 +1,86 @@
 /* The main horizontal container */
+
+WebHog {
+    layout: vertical;
+    background: $surface;
+}
+
 SystemInfoDisplay {
     width: 100%;
-    height: 100%;
     layout: horizontal;
     background: $surface;
-    /* Allow scrolling so info is never truly 'lost' when narrow */
     overflow-x: auto;
     overflow-y: auto;
 }
 
-/* Base style for all blocks - No margins or padding for the 'tight' look */
-.block, .cpu {
-    width: 1fr;
-    min-width: 24; 
-    height: auto;
+#bottom-row {
+    width: 100%;
+    height: 2fr;          
+    layout: horizontal;
+    overflow: hidden;
+}
+
+.panel {
+    height: 100%;
+    width: 1fr;           
     border: round $primary;
     border-title-align: center;
     border-title-style: bold;
-    /* Remove margins and padding to make it touch the edges */
     margin: 0;
-    padding: 0;
+    padding: 0 1;
     background: $surface;
+    overflow-y: auto;
 }
 
-/* Accent borders for distinct sections */
-.cpu { border: round $accent; }
-.disk_memory { border: round $secondary; }
-.network { border: round $warning; }
+/* ── Per-panel accent colours ── */
+.cpu         { border: round $accent; }
+.disk-memory { border: round $secondary; }
+.network     { border: round $warning; }
+.ports       { border: round $success; }
+.ai          { border: round $error; }
 
-/* Each core row: Forced to 1-character height */
-.bar{
+/* ── CPU core rows ── */
+.bar {
     height: 1;
+    layout: horizontal;
     margin: 0;
     padding: 0;
-    layout: horizontal;
 }
 
-/* The Progress Bar: Set a min-width to ensure it stays on screen */
-.cores ProgressBar {
+.bar ProgressBar {
     width: 1fr;
-    min-width: 12; /* This ensures the bar is always visible when narrow */
+    min-width: 12;
     height: 1;
     margin: 0;
 }
 
-/* The labels: Narrowed down to give more room to the bar */
-.cores Static {
+.bar Static {
     width: 5;
     text-style: bold;
-    color: $text-muted;
     content-align: center middle;
+}
+
+.status {
+    height: auto;
+    margin: 0;
+    padding: 0;
+}
+
+PortsSockets {
+    width: 1fr;
+    height: 100%;
+    layout: vertical;
+    padding: 0;
+    margin: 0;
+}
+
+PortsSockets Static {
+    height: 1;
+    color: $text-muted;
+    text-style: bold;
+}
+
+PortsSockets DataTable {
+    height: 1fr;     
+    width: 100%;
 }

@@ -2,8 +2,9 @@ from textual.app import App, ComposeResult
 from textual.widgets import Footer, Header, Static
 from textual.containers import Horizontal, Vertical
 from system_info_display import SystemInfoDisplay
-import asyncio
-import yaml
+from ports_processes import PortsSockets
+from ai_analyser import AIAnalyser
+
 
 class WebHog(App):
 
@@ -13,6 +14,9 @@ class WebHog(App):
         yield Header()
         yield Footer()
         yield SystemInfoDisplay()
+        with Horizontal(id='bottom-row'):
+            yield PortsSockets()
+            yield AIAnalyser()
 
 
 if __name__ == "__main__":

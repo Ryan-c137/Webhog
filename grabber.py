@@ -1,7 +1,6 @@
 import psutil
 import time
 import yaml
-import subprocess
 
 def sys_info_grabber():
 
@@ -65,9 +64,61 @@ def network_info_grabber():
 
     return info
 
+
+def ports_processes_info_grabber():
+    listening_ports = []
+    established_ports = []
+
+    connections = psutil.net_connections()
+
+    for con in connections:
+        if con.status == 'NONE' or not con.laddr:
+            continue
+
+        if con.status not in ['LISTEN', 'ESTABLISHED']:
+            continue
+        
+        port_info = {
+            'port': con.laddr.port,
+            'local_address': con.laddr.ip,
+            'remote_address_ip': con.raddr.ip if con.raddr else 'N/A',
+            'remote_address_port': con.raddr.port if con.raddr else 'N/A',
+            'pid': con.pid,
+        }
+
+        try:
+            process = psutil.Process(con.pid)
+            port_info['process'] = process.name()
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            port_info['process'] = 'Unknown'
+
+        if con.status == 'LISTEN':
+            listening_ports.append(port_info)
+        else:
+            established_ports.append(port_info)
+
+    print(yaml.dump(listening_ports))
+    print(yaml.dump(established_ports))
+
+    # Have to turn them into tuples in an array, so can be fed into tables
+    listening_ports_tuples = []
+    for l in listening_ports:
+        listening_ports_tuples.append((l['port'], l['local_address'], l['process'], l['pid']))
+    
+    established_ports_tuples = []
+    for e in established_ports:
+        established_ports_tuples.append((e['port'], e['local_address'], e['remote_address_ip'], e['remote_address_port'], e['process'], e['pid']))
+
+    # Sort by port number so the table doesn't jump around on refresh
+    listening_ports_tuples.sort(key=lambda r: int(r[0]))
+    established_ports_tuples.sort(key=lambda r: int(r[0]))
+
+    return listening_ports_tuples, established_ports_tuples
+
 def main():
     sys_info_grabber()
     network_info_grabber()
+    ports_processes_info_grabber()
 
 if __name__ == '__main__':
     main()
