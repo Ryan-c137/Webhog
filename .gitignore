@@ -8,3 +8,5 @@ bin/
 __pycache__/
 .DS_Store
 .git/
+note.md
+note\ for\ Git.md

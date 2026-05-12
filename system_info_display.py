@@ -18,21 +18,8 @@ class SystemInfoDisplay(Horizontal):
         with Vertical(classes='panel cpu') as v1:
             v1.border_title = 'CPU Information'
             with Vertical(classes='cores'):
-                with Horizontal(classes='bar'):
-                    yield ProgressBar(total=100, id='core_1_2', show_eta=False)
-                    yield Static('  1&2')
-
-                with Horizontal(classes='bar'):
-                    yield ProgressBar(total=100, id='core_3_4', show_eta=False)
-                    yield Static('  3&4')
-
-                with Horizontal(classes='bar'):
-                    yield ProgressBar(total=100, id='core_5_6', show_eta=False)
-                    yield Static('  5&6')
-
-                with Horizontal(classes='bar'):
-                    yield ProgressBar(total=100, id='core_7_8', show_eta=False)
-                    yield Static('  7&8')
+                yield Static('CPU usage:')
+                yield ProgressBar(total=100, id='core', classes='bar', show_eta=False)
 
                 yield Static('Current CPU Frequency: ' + str(info['cpu_frequency']['current']), id='cpu_frequency', classes='status')
                 yield Static('Maximum CPU Frequency: ' + str(info['cpu_frequency']['max']), classes='status')
@@ -70,14 +57,8 @@ class SystemInfoDisplay(Horizontal):
     async def update_info(self):
         # Update system informtaion
         info = sys_info_grabber()
-        bar1 = self.query_one('#core_1_2')
-        bar1.progress = info['cpu_percent'][0] + info['cpu_percent'][1]
-        bar2 = self.query_one('#core_3_4')
-        bar2.progress = info['cpu_percent'][2] + info['cpu_percent'][3]
-        bar3 = self.query_one('#core_5_6')
-        bar3.progress = info['cpu_percent'][4] + info['cpu_percent'][5]
-        bar4 = self.query_one('#core_7_8')
-        bar4.progress = info['cpu_percent'][6] + info['cpu_percent'][7]
+        bar = self.query_one('#core')
+        bar.progress = info['cpu_percent']
         cpu_frequency = self.query_one('#cpu_frequency')
         cpu_frequency.update('Current CPU Frequency: ' + str(info['cpu_frequency']['current']))
         memory_percentage = self.query_one('#memory_percentage')

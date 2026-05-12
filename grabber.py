@@ -12,7 +12,7 @@ def sys_info_grabber():
     percentage = used / total * 100
 
     info = {
-        'cpu_percent': psutil.cpu_percent(interval=1, percpu=True),
+        'cpu_percent': psutil.cpu_percent(interval=1, percpu=False),
         'cpu_core_numbers': psutil.cpu_count(),
         'cpu_frequency': psutil.cpu_freq()._asdict(),
         'memory_percentage': percentage,
@@ -21,7 +21,7 @@ def sys_info_grabber():
         'memory_free': free,
         'disk_usage_percentage': psutil.disk_usage('/').percent,
         }
-    print(yaml.dump(info))
+    # print(yaml.dump(info))
     return info
 
 def network_info_grabber():
@@ -59,11 +59,10 @@ def network_info_grabber():
         'active': internet_interface_active
     } 
 
-    print(yaml.dump(info))
-    print(info['active'][0]['name'])
+    # print(yaml.dump(info))
+    # print(info['active'][0]['name'])
 
     return info
-
 
 def ports_processes_info_grabber():
     listening_ports = []
@@ -97,8 +96,8 @@ def ports_processes_info_grabber():
         else:
             established_ports.append(port_info)
 
-    print(yaml.dump(listening_ports))
-    print(yaml.dump(established_ports))
+    # print(yaml.dump(listening_ports))
+    # print(yaml.dump(established_ports))
 
     # Have to turn them into tuples in an array, so can be fed into tables
     listening_ports_tuples = []

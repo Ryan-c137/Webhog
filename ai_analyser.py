@@ -8,4 +8,4 @@ class AIAnalyser(Vertical):
     def compose(self) -> ComposeResult:
         with Vertical(classes='panel ai') as ai:
             ai.border_title = 'AI Predictions'
-            yield Static('[ your AiDisplay widget goes here ]')
+            yield Static('[]')
