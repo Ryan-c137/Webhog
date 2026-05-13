@@ -1,6 +1,7 @@
 from textual.app import App, ComposeResult
 from textual.widgets import ProgressBar, Static
 from textual.containers import Horizontal, Vertical
+from data_collector import collector
 
 class AIAnalyser(Vertical):
     CSS_PATH = 'gui.tcss'

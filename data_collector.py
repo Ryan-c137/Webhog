@@ -29,9 +29,15 @@ def collecting_oneshot():
     return info;
 
 # Sending snapshots to AI API, and return the processed answer
-def sender_receiver():
+def sender_receiver(cache):
     API_key = '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'
-    prompt = 'tell me the answer of 1+1, no more words'
+    prompt = 'I am goint to feed you 20 snapshots of a server(' \
+             'Each entry containsconnection counts, bytes transferred, and CPU usage) ' \
+             'of networking information of a machine, and please give me' \
+             ' the score of network security roisk from 0 to 100. Be careful with analysing. ' \
+             'But for result, I want a number between 0 to 100 as score of risk, pure and simple. ' 
+    
+    json_cache = json.dumps(cache)
 
     response = requests.post(
         url="https://openrouter.ai/api/v1/chat/completions",
@@ -42,15 +48,17 @@ def sender_receiver():
             "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
             "messages": [{
                 "role": "user",
-                "content": f"{prompt}"
+                "content": f"{prompt} \n {json_cache}"
             }]
         })
     )
 
     if response.status_code == 200:
-        print(response.json()['choices'][0]['message']['content'])
+        # print(response.json()['choices'][0]['message']['content'])
+        return response.json()['choices'][0]['message']['content']
     else:
-        print(f"Error {response.status_code}: {response.text}")
+        # print(f"Error {response.status_code}: {response.text}")
+        return None
 
 
 
@@ -61,6 +69,7 @@ class DataCollector:
         self.stop_event = threading.Event()
         self.cache = []
         self.window = 20
+        self.risk_score = -1
 
     def start(self):
         if self.thread and self.thread.is_alive(): return
@@ -92,7 +101,10 @@ class DataCollector:
         self.cache.append(snapshot)
         self.lastshot = self.correntshot
         self._cache_cleaner()
-        print(self.cache)
+        if(len(self.cache) >= 20): self.risk_score = sender_receiver(self.cache)
+        # else: print('Collecting enough data for analysing.\n', len(self.cache))
+        # print(self.cache)
+        # print(len(self.cache))
 
     def _run(self):
         while not self.stop_event.is_set():
@@ -103,5 +115,5 @@ class DataCollector:
 
 collector = DataCollector()
 collector.start()
-time.sleep(10)
+time.sleep(300)
 collector.stop()
