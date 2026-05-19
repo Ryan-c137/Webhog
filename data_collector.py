@@ -34,8 +34,16 @@ def sender_receiver(cache):
     prompt = 'I am goint to feed you 20 snapshots of a server(' \
              'Each entry containsconnection counts, bytes transferred, and CPU usage) ' \
              'of networking information of a machine, and please give me' \
-             ' the score of network security roisk from 0 to 100. Be careful with analysing. ' \
-             'But for result, I want a number between 0 to 100 as score of risk, pure and simple. ' 
+             ' the score of network security risk from 0 to 100. Do not give false alarm!' \
+             ' If the score is higher than 60, you need to provide a short but clear reason why you think' \
+             'it has a potential risk of network security. ' \
+             'But for result, I want a number between 0 to 100 as score of risk. ' \
+             'If the score is between 0 to 60, the reply should just be plain score.' \
+             'And if score is higher than 60, the reason can be attached after score.' \
+             'I need the reply follow this format restrictively:' \
+             'For score under 60, just score as the only outcome;' \
+             'For score more than 60, the reply should be pure score, with reason right after it. '
+
     
     json_cache = json.dumps(cache)
 
@@ -45,7 +53,9 @@ def sender_receiver(cache):
             "Authorization": f"Bearer {API_key}",
         },
         data=json.dumps({
+            # deepseek/deepseek-v4-flash:free
             "model": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+            # "model": "deepseek/deepseek-v4-flash:free",
             "messages": [{
                 "role": "user",
                 "content": f"{prompt} \n {json_cache}"
@@ -56,9 +66,9 @@ def sender_receiver(cache):
     if response.status_code == 200:
         # print(response.json()['choices'][0]['message']['content'])
         return response.json()['choices'][0]['message']['content']
-    else:
-        # print(f"Error {response.status_code}: {response.text}")
-        return None
+    # else:
+    #     # print(f"Error {response.status_code}: {response.text}")
+    #     return None
 
 
 
@@ -70,6 +80,8 @@ class DataCollector:
         self.cache = []
         self.window = 20
         self.risk_score = -1
+        self.cache_size = 0
+        self.reason = ''
 
     def start(self):
         if self.thread and self.thread.is_alive(): return
@@ -88,23 +100,33 @@ class DataCollector:
 
     def _collecting(self):
         self.lastshot = collecting_oneshot()
-        self.correntshot = collecting_oneshot()
+        self.currentshot = collecting_oneshot()
         snapshot = {
             'timestamp': time.time(),
-            'listening_ports_number': self.correntshot['listening_ports_number'],
-            'established_connections_number': self.correntshot['established_connections_number'],
-            'sent_MBps': self.correntshot['sent'],
-            'recv_MBps': self.correntshot['recv'],
-            'connections_number_changed': self.correntshot['established_connections_number'] - self.lastshot['established_connections_number'],
-            'cpu_usage': self.correntshot['cpu_usage']
+            'listening_ports_number': self.currentshot['listening_ports_number'],
+            'established_connections_number': self.currentshot['established_connections_number'],
+            'sent_MBps': self.currentshot['sent'],
+            'recv_MBps': self.currentshot['recv'],
+            'connections_number_changed': self.currentshot['established_connections_number'] - self.lastshot['established_connections_number'],
+            'cpu_usage': self.currentshot['cpu_usage']
         }
         self.cache.append(snapshot)
-        self.lastshot = self.correntshot
+        self.lastshot = self.currentshot
         self._cache_cleaner()
-        if(len(self.cache) >= 20): self.risk_score = sender_receiver(self.cache)
-        # else: print('Collecting enough data for analysing.\n', len(self.cache))
-        # print(self.cache)
-        # print(len(self.cache))
+        self.cache_size = len(self.cache)
+        print(self.cache_size)
+        # DEBUGING
+        if(self.cache_size >= 20): 
+            reply = sender_receiver(self.cache)
+
+            # print(reply)
+
+            risk_score_current = str(reply).split()[0] 
+            if(risk_score_current is not None and int(risk_score_current) >= 0): 
+                # time.sleep(5)
+                self.risk_score = int(risk_score_current)
+                if(self.risk_score >= 60):
+                    self.reason = str(reply).split(maxsplit=1)[1] if str(reply).split(maxsplit=1)[1] is not None else 'No clear reason.'
 
     def _run(self):
         while not self.stop_event.is_set():
@@ -114,6 +136,7 @@ class DataCollector:
             self.stop_event.wait(2)
 
 collector = DataCollector()
-collector.start()
-time.sleep(300)
-collector.stop()
+
+if __name__ == '__main__':
+    collector.start()
+    time.sleep(10000)

@@ -1,8 +1,7 @@
-from textual.app import App, ComposeResult
-from textual.widgets import ProgressBar, Static, DataTable
-from textual.containers import Horizontal, Vertical
+from textual.app import ComposeResult
+from textual.widgets import Static, DataTable
+from textual.containers import Vertical
 from grabber import ports_processes_info_grabber
-import psutil
 
 
 class PortsSockets(Vertical):
