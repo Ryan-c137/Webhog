@@ -30,7 +30,7 @@ def collecting_oneshot():
 
 # Sending snapshots to AI API, and return the processed answer
 def sender_receiver(cache):
-    API_key = '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'
+    API_key = '[YOUR API KEY]'
     prompt = 'I am goint to feed you 20 snapshots of a server(' \
              'Each entry containsconnection counts, bytes transferred, and CPU usage) ' \
              'of networking information of a machine, and please give me' \
@@ -48,6 +48,7 @@ def sender_receiver(cache):
     json_cache = json.dumps(cache)
 
     response = requests.post(
+        # TODO: adjust this part to match your service provider
         url="https://openrouter.ai/api/v1/chat/completions",
         headers={
             "Authorization": f"Bearer {API_key}",
