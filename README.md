@@ -2,7 +2,7 @@
 
 > Real-time network monitoring and AI-assisted anomaly detection — entirely in your terminal.
 
-![WebHog Demo](demo.jpeg)
+![WebHog Demo](demo.JPEG)
 
 ---
 
